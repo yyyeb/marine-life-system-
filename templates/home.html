@@ -1,0 +1,2306 @@
+<!-- home.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>海洋生物识别系统 - {{ '管理员' if session.role == 'admin' else '用户' }}主页</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        /* 主界面样式 */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f0f7ff;
+        }
+
+        /* 侧边导航栏 */
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #1a2980, #26d0ce);
+            color: white;
+            padding-top: 20px;
+            box-shadow: 3px 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .logo-container {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-container h2 {
+            margin: 10px 0;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 20px 0;
+        }
+
+        .nav-links li {
+            margin-bottom: 5px;
+        }
+
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            padding: 12px 25px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left: 3px solid #80ffdb;
+        }
+
+        .nav-links i {
+            margin-right: 15px;
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 20px;
+            background-color: #f8fbff;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 15px 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .page-title h1 {
+            font-size: 24px;
+            color: #1a2980;
+            margin: 0;
+        }
+
+        .page-title p {
+            color: #7b8793;
+            margin: 5px 0 0;
+            font-size: 14px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-info h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #2c3e50;
+        }
+
+        .user-info p {
+            margin: 2px 0 0;
+            font-size: 13px;
+            color: #7b8793;
+        }
+
+        /* 内容卡片 */
+        .content-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            font-size: 20px;
+            color: #1a2980;
+        }
+
+        /* 个人信息 */
+        .profile-form {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            border-color: #4361ee;
+            outline: none;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .save-btn {
+            background: linear-gradient(to right, #4361ee, #3a0ca3);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        /* 功能卡片 */
+        .feature-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            height: 120px;
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 50px;
+        }
+
+        .feature-content {
+            padding: 20px;
+        }
+
+        .feature-content h3 {
+            margin-top: 0;
+            color: #1a2980;
+        }
+
+        .feature-content p {
+            color: #7b8793;
+            line-height: 1.6;
+        }
+
+        /* 响应式布局调整 */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .main-content {
+                margin-left: 200px;
+            }
+
+            .profile-form {
+                grid-template-columns: 1fr;
+            }
+
+            .full-width {
+                grid-column: span 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+
+            .logo-container h2, .nav-links span {
+                display: none;
+            }
+
+            .nav-links a {
+                justify-content: center;
+                padding: 15px 0;
+            }
+
+            .nav-links i {
+                margin-right: 0;
+                font-size: 20px;
+            }
+
+            .main-content {
+                margin-left: 70px;
+            }
+
+            .top-nav {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .user-menu {
+                margin-top: 15px;
+            }
+        }
+
+        /* 图像检测 */
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --background-color: #f5f7fa;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px dashed #ccc;
+            border-radius: var(--border-radius);
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-label {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .file-label:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .detect-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .detect-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .detect-btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .result-container {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .result-image {
+            max-width: 100%;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 20px;
+        }
+
+        .info-card {
+            background-color: var(--card-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .info-title {
+            font-weight: 500;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary-color);
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .detection-item {
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            font-family: monospace;
+        }
+
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        /* 图片管理 */
+        .history-image-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px; 
+        }
+        
+        .history-image-item {
+            display: flex;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            padding: 15px;
+            width: 100%;
+            max-width: 600px;
+            transition: transform 0.3s ease;
+        }
+        
+        .history-image-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .history-image {
+            max-width: 150px; 
+            height: auto;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        
+        .history-image-info {
+            margin-left: 15px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .history-date {
+            font-size: 14px;
+            color: #7b8793;
+            margin-top: 5px;
+        }
+        
+        .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.9);
+        }
+    
+        .modal-content {
+        margin: auto;
+        display: block;
+        width: 80%;
+        max-width: 1200px;
+        max-height: 80vh;
+        margin-top: 5vh;
+        }
+    
+        .modal-caption {
+        margin: auto;
+        display: block;
+        width: 80%;
+        max-width: 700px;
+        text-align: center;
+        color: #ccc;
+        padding: 10px 0;
+        height: 150px;
+        }
+    
+        .close {
+        position: absolute;
+        top: 15px;
+        right: 35px;
+        color: #f1f1f1;
+        font-size: 40px;
+        font-weight: bold;
+        transition: 0.3s;
+        }
+    
+        .close:hover, .close:focus {
+        color: #bbb;
+        text-decoration: none;
+        cursor: pointer;
+        }
+    
+        .history-image {
+        cursor: pointer;
+        transition: 0.3s;
+        }
+    
+        .history-image:hover {
+        opacity: 0.7;
+
+        }
+
+        /* 日期筛选样式 */
+        .date-filter-form {
+    background-color: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    margin-bottom: 25px;
+        }
+
+        .date-filter-form .form-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 0;
+        }
+
+        .date-filter-form label {
+    font-weight: 500;
+    color: #2c3e50;
+    margin-bottom: 0;
+        }
+
+        .date-filter-form input[type="date"] {
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: border-color 0.3s;
+        }
+
+        .date-filter-form input[type="date"]:focus {
+    border-color: #4361ee;
+    outline: none;
+        }
+
+        @media (max-width: 600px) {
+        .main-content {
+            padding: 15px;
+        }
+
+        h1 {
+            font-size: 24px;
+        }
+        }
+    
+        /* 用户反馈 */
+        .feedback-form {
+            margin-bottom: 30px;
+        }
+        
+        .history-feedback {
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        
+        .feedback-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .feedback-item p {
+            margin: 5px 0;
+        }
+        
+        .feedback-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .feedback-time {
+            color: #7b8793;
+            font-size: 13px;
+        }
+        
+        .no-feedback {
+            text-align: center;
+            padding: 20px;
+            color: #7b8793;
+            font-style: italic;
+        }
+        
+        /* 管理员反馈 */
+        .admin-feedback-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .feedback-stats {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+        
+        .stat-card {
+            flex: 1;
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        
+        .stat-card h3 {
+            margin: 0 0 10px;
+            font-size: 16px;
+            color: #7b8793;
+        }
+        
+        .stat-card .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a2980;
+        }
+        
+        .feedback-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        
+        .feedback-table th, .feedback-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .feedback-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .feedback-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .feedback-table tr:hover {
+            background-color: #f5faff;
+        }
+        
+        .feedback-status {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background: #ffecb3;
+            color: #f57c00;
+        }
+        
+        .status-reviewed {
+            background: #c8e6c9;
+            color: #388e3c;
+        }
+        
+        .status-resolved {
+            background: #bbdefb;
+            color: #1976d2;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        
+        .btn-review {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .btn-resolve {
+            background: #2196f3;
+            color: white;
+        }
+        
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+        
+        .action-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 8px;
+        }
+        
+        .page-btn {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .page-btn.active {
+            background: #1a2980;
+            color: white;
+            border-color: #1a2980;
+        }
+        
+        .no-feedbacks {
+            text-align: center;
+            padding: 30px;
+            color: #7b8793;
+            font-style: italic;
+        }
+        
+        .feedback-content {
+            max-width: 400px;
+            word-wrap: break-word;
+        }
+
+        /* 生物图鉴 */
+        .biology-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+        
+        .biology-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .biology-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .biology-image {
+            height: 200px;
+            width: 100%;
+            object-fit: cover;
+        }
+        
+        .biology-content {
+            padding: 20px;
+        }
+        
+        .biology-content h3 {
+            margin-top: 0;
+            color: #1a2980;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .biology-content .scientific-name {
+            font-size: 14px;
+            color: #7b8793;
+            font-style: italic;
+            margin: 5px 0;
+        }
+        
+        .biology-content p {
+            color: #555;
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+        
+        .biology-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+        
+        .tag-normal {
+            background: #c8e6c9;
+            color: #388e3c;
+        }
+        
+        .tag-endangered {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+        
+        /* 管理表格样式 */
+        .admin-biology-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .admin-biology-table th, 
+        .admin-biology-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .admin-biology-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .admin-biology-table tr:hover {
+            background-color: #f5faff;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+            width: 80%;
+            max-width: 700px;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            margin: 0;
+            font-size: 22px;
+            color: #1a2980;
+        }
+        
+        .close-modal {
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s;
+        }
+        
+        .close-modal:hover {
+            color: #333;
+        }
+        
+        /* 表单样式 */
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            flex: 1;
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .form-group input, 
+        .form-group textarea, 
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        
+        .btn-cancel {
+            background: #f5f5f5;
+            color: #555;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .btn-cancel:hover {
+            background: #e0e0e0;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边导航栏 -->
+        <div class="sidebar">
+            <div class="logo-container">
+                <h2>海洋生物识别系统</h2>
+                <p>{{ '管理员' if session.role == 'admin' else '用户' }}控制台</p>
+            </div>
+
+            <ul class="nav-links">
+                {% if session.role == 'user' %}
+                    <li><a href="#" id="home-link" class="active"><i class="fas fa-images"></i> <span>个人信息</span></a></li>
+                    <li><a href="#" id="detect-link"><i class="fas fa-camera"></i> <span>图像检测</span></a></li>
+                    <li><a href="#" id="search-link"><i class="fas fa-search"></i> <span>图片管理</span></a></li>
+                    <li><a href="#" id="biology-link"><i class="fas fa-fish"></i> <span>生物图鉴</span></a></li>
+                    <li><a href="#" id="feedback-link"><i class="fas fa-comment-dots"></i> <span>图鉴反馈</span></a></li>
+                {% else %}
+                    <li><a href="#" id="home-link" class="active"><i class="fas fa-user"></i> <span>个人信息</span></a></li>
+                    <li><a href="#" id="admin-biology-link"><i class="fas fa-edit"></i> <span>生物图鉴修改</span></a></li>
+                    <li><a href="#" id="admin-feedback-link"><i class="fas fa-comments"></i> <span>图鉴反馈</span></a></li>
+                {% endif %}
+                <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> <span>退出登录</span></a></li>
+            </ul>
+        </div>
+
+        <!-- 主内容 -->
+        <div class="main-content">
+            <!-- 顶部导航栏 -->
+            <div class="top-nav">
+                <div class="page-title">
+                    <h1 id="page-title">海洋生物识别系统</h1>
+                    <p>欢迎回来，{{ session.username }}！今天是 {{ current_date }}</p>
+                </div>
+
+                <div class="user-menu">
+                    <div class="user-avatar">{{ session.username[0]|upper }}</div>
+                    <div class="user-info">
+                        <h3>{{ session.username }}</h3>
+                        <p>{{ '管理员' if session.role == 'admin' else '普通用户' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- home.html -->
+            <div id="home-content">
+                <!-- 个人信息 -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-user-circle"></i> 个人信息</h2>
+                    </div>
+
+                    <form class="profile-form" method="POST" action="/update_profile">
+                        <div class="form-group">
+                            <label for="name">姓名</label>
+                            <input type="text" id="name" name="name" value="{{ user_info.name or '' }}" placeholder="请输入您的姓名">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="age">年龄</label>
+                            <input type="number" id="age" name="age" value="{{ user_info.age or '' }}" placeholder="请输入您的年龄">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nationality">民族</label>
+                            <input type="text" id="nationality" name="nationality" value="{{ user_info.nationality or '' }}" placeholder="请输入您的民族">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="occupation">职业</label>
+                            <input type="text" id="occupation" name="occupation" value="{{ user_info.occupation or '' }}" placeholder="请输入您的职业">
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="bio">个人简介</label>
+                            <textarea id="bio" name="bio" placeholder="请介绍一下自己...">{{ user_info.bio or '' }}</textarea>
+                        </div>
+
+                        <div class="form-group full-width" style="text-align: right;">
+                            <button type="submit" class="save-btn">保存信息</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 功能 -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-star"></i> 系统功能</h2>
+                    </div>
+
+                    <div class="feature-cards">
+                        {% if session.role == 'user' %}
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-images"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h3>图片管理</h3>
+                                    <p>存储了用户所检测后的所有已标记的图片，供用户记录参考。</p>
+                                </div>
+                            </div>
+
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h3>图像检测</h3>
+                                    <p>使用先进的技术识别照片中的海洋生物的位置。</p>
+                                </div>
+                            </div>
+
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-fish"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h3>生物图鉴</h3>
+                                    <p>探索丰富的海洋生物数据库，了解各种海洋生物的特征和生态环境。</p>
+                                </div>
+                            </div>
+
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-comment-dots"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h3>图鉴反馈</h3>
+                                    <p>提供您对生物图鉴的反馈，帮助我们改进系统的识别准确性和信息质量。</p>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-edit"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h3>生物图鉴管理</h3>
+                                    <p>管理海洋生物数据库，添加、编辑和更新海洋生物信息，确保数据准确性和完整性。</p>
+                                </div>
+                            </div>
+
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-comments"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h3>图鉴反馈管理</h3>
+                                    <p>查看和处理用户提交的反馈，改进生物图鉴内容，提升用户体验。</p>
+                                </div>
+                            </div>
+                            
+                            
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 识别 detect.html -->
+            <div id="detect-content" style="display: none;">
+                <h1>水下目标检测系统</h1>
+
+                <div class="upload-area">
+                    <input type="file" id="img" class="file-input" accept="image/*">
+                    <label for="img" class="file-label">选择图片</label>
+                    <span id="file-name">未选择文件</span>
+                    <button id="detect-btn" class="detect-btn" disabled>开始检测</button>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>正在检测中，请稍候...</p>
+                </div>
+
+                <div class="result-container" id="result-container">
+                    <h2 class="info-title">检测结果</h2>
+                    <img id="out" class="result-image">
+
+                    <div class="info-card">
+                        <h3 class="info-title">检测信息</h3>
+                        <div id="info"></div>
+                    </div>
+                </div>
+
+                <footer>
+                    <p>基于YOLOv5的水下目标检测系统 &copy; 2025</p>
+                </footer>
+            </div>
+            
+            <!-- 用户反馈 -->
+            <div id="feedback-content" style="display: none;">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-comment-dots"></i> 图鉴反馈</h2>
+                    </div>
+                    
+                    <div class="feedback-form">
+                        <div class="form-group full-width">
+                            <label for="feedback-text">反馈内容</label>
+                            <textarea id="feedback-text" placeholder="请输入您对生物图鉴的反馈意见..." rows="5"></textarea>
+                        </div>
+                        <div class="form-group full-width" style="text-align: right;">
+                            <button id="submit-feedback" class="save-btn">提交反馈</button>
+                        </div>
+                    </div>
+                    
+                    <div class="history-feedback">
+                        <h3><i class="fas fa-history"></i> 历史反馈记录</h3>
+                        <div id="feedback-list">
+                            <div class="no-feedback">暂无历史反馈记录</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 管理员反馈 -->
+            <div id="admin-feedback-content" style="display: none;">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-comments"></i> 图鉴反馈管理</h2>
+                        <p>管理用户提交的反馈信息，及时处理用户建议和问题</p>
+                    </div>
+                    
+                    <div class="admin-feedback-container">
+                        <div class="feedback-stats">
+                            <div class="stat-card">
+                                <h3>总反馈数</h3>
+                                <div class="stat-value" id="total-feedbacks">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>待处理</h3>
+                                <div class="stat-value" id="pending-feedbacks">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>已解决</h3>
+                                <div class="stat-value" id="resolved-feedbacks">0</div>
+                            </div>
+                        </div>
+                        
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h2><i class="fas fa-filter"></i> 反馈筛选</h2>
+                            </div>
+                            <div class="feedback-filters">
+                                <div class="form-group">
+                                    <label for="status-filter">状态</label>
+                                    <select id="status-filter">
+                                        <option value="all">全部状态</option>
+                                        <option value="pending">待处理</option>
+                                        <option value="reviewed">已审核</option>
+                                        <option value="resolved">已解决</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="user-filter">用户</label>
+                                    <input type="text" id="user-filter" placeholder="输入用户名搜索">
+                                </div>
+                                <button id="apply-filter-btn" class="save-btn">应用筛选</button>
+                            </div>
+                        </div>
+                        
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h2><i class="fas fa-list"></i> 反馈列表</h2>
+                            </div>
+                            <div class="table-container">
+                                <table class="feedback-table">
+                                    <thead>
+                                        <tr>
+                                            <th width="5%">ID</th>
+                                            <th width="15%">用户</th>
+                                            <th width="40%">反馈内容</th>
+                                            <th width="15%">提交时间</th>
+                                            <th width="10%">状态</th>
+                                            <th width="15%">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="feedback-table-body">
+                                    </tbody>
+                                </table>
+                                
+                                <div id="no-feedbacks-message" class="no-feedbacks" style="display: none;">
+                                    暂无反馈记录
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+             <!-- 生物图鉴 -->
+            <div id="biology-content" style="display: none;">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-fish"></i> 海洋生物图鉴</h2>
+                        <p>探索海洋生物的奇妙世界</p>
+                    </div>
+                    
+                    <div class="content-card">
+                        <h3>普通海洋生物</h3>
+                        <div class="biology-cards" id="normal-biology-container">
+                        </div>
+                    </div>
+                    
+                    <div class="content-card">
+                        <h3>濒危海洋生物</h3>
+                        <div class="biology-cards" id="endangered-biology-container">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 生物图鉴修改 -->
+            <div id="admin-biology-content" style="display: none;">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-edit"></i> 生物图鉴管理</h2>
+                        <p>管理海洋生物信息</p>
+                    </div>
+                    
+                    <button id="add-biology-btn" class="save-btn" style="margin-bottom: 20px;">
+                        <i class="fas fa-plus"></i> 添加新生物
+                    </button>
+                    
+                    <table class="admin-biology-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>名称</th>
+                                <th>学名</th>
+                                <th>类别</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="biology-table-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- 生物图鉴修改模态框 -->
+            <div id="biology-modal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title" id="modal-title">添加海洋生物</h3>
+                        <span class="close-modal">&times;</span>
+                    </div>
+                    
+                    <form id="biology-form">
+                        <input type="hidden" id="biology-id">
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="biology-name">名称 *</label>
+                                <input type="text" id="biology-name" name="name" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="biology-scientific">学名</label>
+                                <input type="text" id="biology-scientific" name="scientific_name">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="biology-category">类别 *</label>
+                                <select id="biology-category" name="category" required>
+                                    <option value="normal">普通海洋生物</option>
+                                    <option value="endangered">濒危海洋生物</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="biology-habitat">栖息地</label>
+                                <input type="text" id="biology-habitat" name="habitat">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="biology-image">图片URL *</label>
+                            <input type="text" id="biology-image" name="image_url" required>
+                            <small>示例: /path/to/image.jpg 或 https://example.com/image.jpg</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="biology-description">描述 *</label>
+                            <textarea id="biology-description" name="description" required></textarea>
+                        </div>
+                        
+                        <div class="modal-footer">
+                            <button type="button" class="btn-cancel" id="cancel-biology">取消</button>
+                            <button type="submit" class="save-btn">保存</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // 设置活动导航项
+        function setActiveNav(linkId) {
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.classList.remove('active');
+            });
+            var activeLink = document.getElementById(linkId);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+        }
+
+        // 主页链接点击事件
+        var homeLink = document.getElementById('home-link');
+        if (homeLink) {
+            homeLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                setActiveNav('home-link');
+                document.getElementById('home-content').style.display = 'block';
+                document.getElementById('detect-content').style.display = 'none';
+                document.getElementById('feedback-content').style.display = 'none';
+                document.getElementById('admin-feedback-content').style.display = 'none';
+                document.getElementById('feedback-content').style.display = 'none';
+                document.getElementById('search-content').style.display = 'none';
+                document.getElementById('biology-content').style.display = 'none';
+                document.getElementById('page-title').textContent = '海洋生物识别系统';
+            });
+        }
+
+        // 图片管理
+        var searchLink = document.getElementById('search-link');
+        if (searchLink) {
+            searchLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                setActiveNav('search-link');
+                // 隐藏其他内容
+                hideContent(['home-content', 'detect-content', 'feedback-content']);
+                // 显示或创建搜索内容
+                showOrCreateSearchContent();
+                // 设置页面标题
+                setPageTitle('图片管理');
+                // 加载图片
+                loadImagesWithFilter();
+            });
+        }
+
+        // 隐藏指定ID的内容元素
+        function hideContent(ids) {
+            ids.forEach(id => {
+                var element = document.getElementById(id);
+                if (element) {
+                    element.style.display = 'none';
+                }
+            });
+        }
+
+        // 显示或创建搜索内容
+        function showOrCreateSearchContent() {
+            let searchContent = document.getElementById('search-content');
+            if (!searchContent) {
+                searchContent = document.createElement('div');
+                searchContent.id = 'search-content';
+                searchContent.style.display = 'block';
+                document.querySelector('.main-content').appendChild(searchContent);
+                // 添加日期筛选表单
+                searchContent.innerHTML = `
+                    <h1>图片管理 - 已检测图片</h1>
+                    <div class="date-filter-form">
+                        <div class="form-group">
+                            <label for="date-filter">筛选日期：</label>
+                            <input type="date" id="date-filter" name="date-filter">
+                            <button id="apply-filter" class="save-btn">应用筛选</button>
+                            <button id="clear-filter" class="save-btn" style="background: #e74c3c;">清除筛选</button>
+                        </div>
+                    </div>
+                    <div class="history-image-container" id="history-container"></div>
+                `;
+                // 绑定筛选按钮事件
+                bindFilterButtons();
+            } else {
+                searchContent.style.display = 'block';
+            }
+        }
+
+        // 绑定筛选按钮事件
+        function bindFilterButtons() {
+            var applyFilterBtn = document.getElementById('apply-filter');
+            if (applyFilterBtn) {
+                applyFilterBtn.addEventListener('click', loadImagesWithFilter);
+            }
+            var clearFilterBtn = document.getElementById('clear-filter');
+            if (clearFilterBtn) {
+                clearFilterBtn.addEventListener('click', function() {
+                    var dateFilter = document.getElementById('date-filter');
+                    if (dateFilter) {
+                        dateFilter.value = '';
+                    }
+                    loadImagesWithFilter();
+                });
+            }
+        }
+
+        // 设置页面标题
+        function setPageTitle(title) {
+            var pageTitle = document.getElementById('page-title');
+            if (pageTitle) {
+                pageTitle.textContent = title;
+            }
+        }
+
+        // 加载图片函数
+        function loadImagesWithFilter() {
+            const dateFilter = document.getElementById('date-filter')?.value || '';
+            const container = document.getElementById('history-container');
+            // 清空容器
+            if (container) {
+                container.innerHTML = '<div class="loading"><div class="spinner"></div><p>加载中...</p></div>';
+            }
+            // 发送请求获取用户已检测的图片信息
+            fetch(`/user_detected_images?date=${dateFilter}`)
+            .then(response => {
+                    if (!response.ok) {
+                        throw new Error('网络响应不正常');
+                    }
+                    return response.json();
+                })
+            .then(data => {
+                    if (!container) return;
+                    container.innerHTML = '';
+                    if (data.images.length === 0) {
+                        container.innerHTML = '<p>没有找到符合条件的图片。</p>';
+                    } else {
+                        data.images.forEach(image => {
+                            createImageItem(container, image);
+                        });
+                    }
+                })
+            .catch(error => {
+                    if (container) {
+                        container.innerHTML = `<p class="error">获取图片信息失败: ${error.message}</p>`;
+                    }
+                    console.error('Error:', error);
+                });
+        }
+
+        // 创建图片项
+        function createImageItem(container, image) {
+            // 创建图片项容器
+            const item = document.createElement('div');
+            item.classList.add('history-image-item');
+            // 创建图片元素
+            const imgElement = document.createElement('img');
+            imgElement.src = image.vis_path;
+            imgElement.classList.add('history-image');
+            imgElement.alt = image.filename;
+            // 创建信息容器
+            const infoContainer = document.createElement('div');
+            infoContainer.classList.add('history-image-info');
+            // 添加文件名
+            const filenameElement = document.createElement('h3');
+            filenameElement.textContent = image.filename;
+            // 添加上传日期，格式化日期显示
+            const dateElement = document.createElement('p');
+            dateElement.classList.add('history-date');
+            const uploadDate = new Date(image.created_at);
+            dateElement.textContent = `上传日期: ${uploadDate.toLocaleDateString()} ${uploadDate.toLocaleTimeString()}`;
+            // 组装元素
+            infoContainer.appendChild(filenameElement);
+            infoContainer.appendChild(dateElement);
+            item.appendChild(imgElement);
+            item.appendChild(infoContainer);
+            container.appendChild(item);
+            // 图片点击事件（显示大图模态框）
+            imgElement.onclick = function() {
+                createImageModal(image, dateElement.textContent);
+            };
+        }
+
+        // 创建图片模态框
+        function createImageModal(image, dateText) {
+            // 创建模态框
+            const modal = document.createElement('div');
+            modal.id = 'myModal';
+            modal.className = 'modal';
+            // 创建关闭按钮
+            const closeBtn = document.createElement('span');
+            closeBtn.className = 'close';
+            closeBtn.innerHTML = '&times;';
+            closeBtn.onclick = function() {
+                modal.style.display = 'none';
+                document.body.removeChild(modal);
+            };
+            // 创建大图
+            const modalImg = document.createElement('img');
+            modalImg.id = 'modal-image';
+            modalImg.className = 'modal-content';
+            modalImg.src = image.vis_path;
+            // 创建图片标题
+            const captionText = document.createElement('div');
+            captionText.id = 'caption';
+            captionText.className = 'modal-caption';
+            captionText.innerHTML = `<h2>${image.filename}</h2><p>${dateText}</p>`;
+            // 添加到模态框
+            modal.appendChild(closeBtn);
+            modal.appendChild(modalImg);
+            modal.appendChild(captionText);
+            // 添加到页面
+            document.body.appendChild(modal);
+            // 显示模态框
+            modal.style.display = 'block';
+            // 点击模态框外部关闭
+            modal.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                    document.body.removeChild(modal);
+                }
+            };
+        }
+
+        // 图像检测链接点击事件
+        var detectLink = document.getElementById('detect-link');
+        if (detectLink) {
+            detectLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                setActiveNav('detect-link');
+                document.getElementById('home-content').style.display = 'none';
+                document.getElementById('detect-content').style.display = 'block';
+                document.getElementById('feedback-content').style.display = 'none';
+                document.getElementById('admin-feedback-content').style.display = 'none';
+                document.getElementById('search-content').style.display = 'none';
+                document.getElementById('biology-content').style.display = 'none';
+                document.getElementById('page-title').textContent = '图像检测';
+            });
+        }
+
+        // 文件选择处理
+        var imgInput = document.getElementById('img');
+        if (imgInput) {
+            imgInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    document.getElementById('file-name').textContent = file.name;
+                    document.getElementById('detect-btn').disabled = false;
+                }
+            });
+        }
+
+        // 检测按钮点击事件
+        var detectBtn = document.getElementById('detect-btn');
+        if (detectBtn) {
+            detectBtn.addEventListener('click', upload);
+        }
+
+        function upload() {
+            const file = document.getElementById('img').files[0];
+            if (!file) {
+                alert('请先选择图片文件');
+                return;
+            }
+
+            // 显示加载状态
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result-container').style.display = 'none';
+
+            const fd = new FormData();
+            fd.append('file', file);
+
+            fetch('/detect', {
+                method: 'POST',
+                body: fd
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('网络响应不正常');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // 隐藏加载状态
+                document.getElementById('loading').style.display = 'none';
+
+                // 显示结果
+                const infoDiv = document.getElementById('info');
+                infoDiv.innerHTML = `
+                    <p><strong>检测耗时:</strong> ${data.time}ms</p>
+                    <p><strong>检测结果:</strong></p>
+                    ${data.detections.map(det => `
+                        <div class="detection-item">
+                            ${JSON.stringify(det)}
+                        </div>
+                    `).join('')}
+                `;
+
+                document.getElementById('out').src = data.vis_path;
+                document.getElementById('result-container').style.display = 'block';
+            })
+            .catch(error => {
+                document.getElementById('loading').style.display = 'none';
+                alert('检测失败: ' + error.message);
+                console.error('Error:', error);
+            });
+        }
+        
+        // 用户图鉴反馈链接点击事件
+        var feedbackLink = document.getElementById('feedback-link');
+        if (feedbackLink) {
+            feedbackLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                setActiveNav('feedback-link');
+                // 加载历史反馈
+                loadFeedbackHistory();
+                document.getElementById('home-content').style.display = 'none';
+                document.getElementById('detect-content').style.display = 'none';
+                document.getElementById('feedback-content').style.display = 'block';
+                document.getElementById('admin-feedback-content').style.display = 'none';
+                document.getElementById('search-content').style.display = 'none';
+                document.getElementById('biology-content').style.display = 'none';
+                document.getElementById('page-title').textContent = '图鉴反馈';
+            });
+        }
+
+        // 提交反馈
+        function submitFeedback() {
+            var feedbackText = document.getElementById('feedback-text').value.trim();
+            if (!feedbackText) {
+                alert('反馈内容不能为空！');
+                return;
+            }
+            
+            document.getElementById('submit-feedback').textContent = '提交中...';
+            document.getElementById('submit-feedback').disabled = true;
+            
+            fetch('/submit_feedback', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    content: feedbackText,
+                    username: "{{ session.username }}",
+                    role: "{{ session.role }}"
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('submit-feedback').textContent = '提交反馈';
+                document.getElementById('submit-feedback').disabled = false;
+                
+                if (data.success) {
+                    alert('反馈提交成功！');
+                    document.getElementById('feedback-text').value = '';
+                    loadFeedbackHistory();
+                } else {
+                    alert('反馈提交失败：' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('提交反馈时出错，请重试。');
+                document.getElementById('submit-feedback').textContent = '提交反馈';
+                document.getElementById('submit-feedback').disabled = false;
+            });
+        }
+
+        // 加载历史反馈
+        function loadFeedbackHistory() {
+            fetch('/get_feedbacks?username={{ session.username }}')
+            .then(response => response.json())
+            .then(data => {
+                var feedbackList = document.getElementById('feedback-list');
+                
+                if (data.success && data.feedbacks.length > 0) {
+                    feedbackList.innerHTML = '';
+                    
+                    data.feedbacks.forEach(fb => {
+                        var feedbackItem = document.createElement('div');
+                        feedbackItem.className = 'feedback-item';
+                        
+                        // 格式化日期
+                        var date = new Date(fb.timestamp);
+                        var formattedDate = date.toLocaleString('zh-CN', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                        
+                        feedbackItem.innerHTML = `
+                            <div class="feedback-header">
+                                <strong>${fb.username}</strong>
+                                <span class="feedback-time">${formattedDate}</span>
+                            </div>
+                            <p>${fb.content}</p>
+                        `;
+                        feedbackList.appendChild(feedbackItem);
+                    });
+                } else {
+                    feedbackList.innerHTML = '<div class="no-feedback">暂无历史反馈记录</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('feedback-list').innerHTML = '<div class="no-feedback">加载历史反馈失败</div>';
+            });
+        }
+        
+        // 绑定提交反馈按钮的点击事件
+        var submitFeedbackBtn = document.getElementById('submit-feedback');
+        if (submitFeedbackBtn) {
+            submitFeedbackBtn.addEventListener('click', submitFeedback);
+        }
+        
+        // 管理员图鉴反馈链接点击事件
+        var adminFeedbackLink = document.getElementById('admin-feedback-link');
+        if (adminFeedbackLink) {
+            adminFeedbackLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                setActiveNav('admin-feedback-link');
+                document.getElementById('home-content').style.display = 'none';
+                document.getElementById('detect-content').style.display = 'none';
+                document.getElementById('feedback-content').style.display = 'none';
+                document.getElementById('admin-feedback-content').style.display = 'block';
+                document.getElementById('admin-biology-content').style.display = 'none';
+                document.getElementById('page-title').textContent = '图鉴反馈管理';
+              
+                // 加载管理员反馈数据
+                loadAdminFeedback();
+            });
+        }
+
+        //管理员筛选反馈
+        var applyfilterbtn=document.getElementById('apply-filter-btn');
+        if (applyfilterbtn) {
+            applyfilterbtn.addEventListener('click',function(e){
+                e.preventDefault();
+                const statusFilter = document.getElementById('status-filter').value;
+                const userFilter = document.getElementById('user-filter').value;
+            loadAdminFeedback(statusFilter, userFilter);
+            });
+       
+        }
+
+        // 加载数据
+        function loadAdminFeedback(statusFilter = 'all', userFilter = '') {
+        // 显示加载状态
+        document.getElementById('feedback-table-body').innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 30px;">
+                    <div class="spinner"></div>
+                    <p>正在加载反馈数据...</p>
+                </td>
+            </tr>
+        `;
+
+        let url = `/admin/feedbacks?status=${statusFilter}`;
+        if (userFilter) {
+            url += `&username=${userFilter}`;
+        }
+
+        fetch(url)
+           .then(response => response.json())
+           .then(data => {
+                if (data.success && data.feedbacks.length > 0) {
+                    // 更新统计数据
+                    updateFeedbackStats(data.feedbacks);
+
+                    // 渲染反馈表格
+                    renderFeedbackTable(data.feedbacks);
+                } else {
+                    document.getElementById('feedback-table-body').innerHTML = '';
+                    document.getElementById('no-feedbacks-message').style.display = 'block';
+                }
+            })
+           .catch(error => {
+                console.error('加载反馈数据失败:', error);
+                document.getElementById('feedback-table-body').innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #f44336; padding: 30px;">
+                            加载反馈数据失败，请重试
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // 更新反馈统计数据
+        function updateFeedbackStats(feedbacks) {
+            const total = feedbacks.length;
+            const pending = feedbacks.filter(fb => fb.status === 'pending').length;
+            const resolved = feedbacks.filter(fb => fb.status === 'resolved').length;
+            
+            document.getElementById('total-feedbacks').textContent = total;
+            document.getElementById('pending-feedbacks').textContent = pending;
+            document.getElementById('resolved-feedbacks').textContent = resolved;
+        }
+
+        // 渲染反馈表格
+        function renderFeedbackTable(feedbacks) {
+            const tableBody = document.getElementById('feedback-table-body');
+            tableBody.innerHTML = '';
+            
+            feedbacks.forEach(fb => {
+                const row = document.createElement('tr');
+                
+                // 格式化日期
+                const date = new Date(fb.created_at);
+                const formattedDate = date.toLocaleString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                // 确定状态样式
+                let statusClass = 'status-pending';
+                let statusText = '待处理';
+                
+                if (fb.status === 'reviewed') {
+                    statusClass = 'status-reviewed';
+                    statusText = '已审核';
+                } else if (fb.status === 'resolved') {
+                    statusClass = 'status-resolved';
+                    statusText = '已解决';
+                }
+                
+                row.innerHTML = `
+                    <td>${fb.id}</td>
+                    <td><strong>${fb.username}</strong></td>
+                    <td class="feedback-content">${fb.content}</td>
+                    <td>${formattedDate}</td>
+                    <td><span class="feedback-status ${statusClass}">${statusText}</span></td>
+                    <td class="action-buttons">
+                        ${fb.status === 'pending' ? 
+                            `<button class="action-btn btn-review" data-id="${fb.id}">标记审核</button>` : ''}
+                        ${fb.status !== 'resolved' ? 
+                            `<button class="action-btn btn-resolve" data-id="${fb.id}">标记解决</button>` : ''}
+                        <button class="action-btn btn-delete" data-id="${fb.id}">删除</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // 添加事件监听器到操作按钮
+            document.querySelectorAll('.btn-review').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    updateFeedbackStatus(this.dataset.id, 'reviewed');
+                });
+            });
+            
+            document.querySelectorAll('.btn-resolve').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    updateFeedbackStatus(this.dataset.id, 'resolved');
+                });
+            });
+            
+            document.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    deleteFeedback(this.dataset.id);
+                });
+            });
+        }
+
+        // 更新反馈状态
+        function updateFeedbackStatus(feedbackId, status) {
+            if (!confirm(`确定要将反馈 #${feedbackId} 标记为"${status === 'reviewed' ? '已审核' : '已解决'}"吗?`)) {
+                return;
+            }
+            
+            fetch(`/admin/update_feedback_status/${feedbackId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status: status })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('反馈状态更新成功！');
+                    loadAdminFeedback();
+                } else {
+                    alert('更新失败: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('更新反馈状态失败:', error);
+                alert('更新反馈状态时出错，请重试。');
+            });
+        }
+
+        // 删除反馈
+        function deleteFeedback(feedbackId) {
+            if (!confirm(`确定要删除反馈 #${feedbackId} 吗? 此操作不可撤销。`)) {
+                return;
+            }
+            
+            fetch(`/admin/delete_feedback/${feedbackId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('反馈删除成功！');
+                    loadAdminFeedback();
+                } else {
+                    alert('删除失败: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('删除反馈失败:', error);
+                alert('删除反馈时出错，请重试。');
+            });
+        }
+        // 生物图鉴链接点击事件
+        var biologyLink = document.getElementById('biology-link');
+        if (biologyLink) {
+            biologyLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                setActiveNav('biology-link');
+                document.getElementById('home-content').style.display = 'none';
+                document.getElementById('detect-content').style.display = 'none';
+                document.getElementById('feedback-content').style.display = 'none';
+                document.getElementById('admin-feedback-content').style.display = 'none';
+                document.getElementById('admin-biology-content').style.display = 'none';
+                document.getElementById('search-content').style.display = 'none';
+                document.getElementById('biology-content').style.display = 'block';
+                document.getElementById('page-title').textContent = '海洋生物图鉴';
+                // 加载海洋生物数据
+                loadMarineLife();
+            });
+        }
+        
+        // 生物图鉴修改链接点击事件
+        var adminBiologyLink = document.getElementById('admin-biology-link');
+        if (adminBiologyLink) {
+            adminBiologyLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                setActiveNav('admin-biology-link');
+                document.getElementById('home-content').style.display = 'none';
+                document.getElementById('detect-content').style.display = 'none';
+                document.getElementById('feedback-content').style.display = 'none';
+                document.getElementById('admin-feedback-content').style.display = 'none';
+                document.getElementById('biology-content').style.display = 'none';
+                document.getElementById('admin-biology-content').style.display = 'block';
+                document.getElementById('page-title').textContent = '生物图鉴管理';
+                // 加载海洋生物数据
+                loadAdminMarineLife();
+            });
+        }
+        
+        // 用户加载海洋生物数据
+        function loadMarineLife() {
+            fetch('/marine_life')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        renderMarineLife(data.marine_life);
+                    } else {
+                        console.error('加载海洋生物数据失败:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('加载海洋生物数据失败:', error);
+                });
+        }
+        
+        // 渲染海洋生物
+        function renderMarineLife(marineLife) {
+            const normalContainer = document.getElementById('normal-biology-container');
+            const endangeredContainer = document.getElementById('endangered-biology-container');
+            
+            normalContainer.innerHTML = '';
+            endangeredContainer.innerHTML = '';
+            
+            marineLife.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'biology-card';
+                
+                card.innerHTML = `
+                    <img src="${item.image_url}" alt="${item.name}" class="biology-image">
+                    <div class="biology-content">
+                        <h3>
+                            ${item.name}
+                            <span class="biology-tag ${item.category === 'normal' ? 'tag-normal' : 'tag-endangered'}">
+                                ${item.category === 'normal' ? '普通生物' : '濒危生物'}
+                            </span>
+                        </h3>
+                        <div class="scientific-name">${item.scientific_name}</div>
+                        <p><strong>栖息地:</strong> ${item.habitat}</p>
+                        <p>${item.description}</p>
+                    </div>
+                `;
+                
+                if (item.category === 'normal') {
+                    normalContainer.appendChild(card);
+                } else {
+                    endangeredContainer.appendChild(card);
+                }
+            });
+            
+            if (normalContainer.children.length === 0) {
+                normalContainer.innerHTML = '<p>暂无普通海洋生物数据</p>';
+            }
+            if (endangeredContainer.children.length === 0) {
+                endangeredContainer.innerHTML = '<p>暂无濒危海洋生物数据</p>';
+            }
+        }
+        
+        // 管理员加载海洋生物数据
+        function loadAdminMarineLife() {
+            fetch('/marine_life')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        renderAdminMarineLife(data.marine_life);
+                    } else {
+                        console.error('加载海洋生物数据失败:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('加载海洋生物数据失败:', error);
+                });
+        }
+        
+        // 渲染海洋生物表格
+        function renderAdminMarineLife(marineLife) {
+            const tableBody = document.getElementById('biology-table-body');
+            tableBody.innerHTML = '';
+            
+            marineLife.forEach(item => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${item.id}</td>
+                    <td>${item.name}</td>
+                    <td>${item.scientific_name}</td>
+                    <td>
+                        <span class="biology-tag ${item.category === 'normal' ? 'tag-normal' : 'tag-endangered'}">
+                            ${item.category === 'normal' ? '普通生物' : '濒危生物'}
+                        </span>
+                    </td>
+                    <td class="action-buttons">
+                        <button class="action-btn btn-edit" data-id="${item.id}">编辑</button>
+                        <button class="action-btn btn-delete" data-id="${item.id}">删除</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // 绑定编辑按钮事件
+            document.querySelectorAll('.btn-edit').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    editMarineLife(id);
+                });
+            });
+            
+            // 绑定删除按钮事件
+            document.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    deleteMarineLife(id);
+                });
+            });
+        }
+        
+        // 编辑海洋生物
+        function editMarineLife(id) {
+            fetch('/marine_life')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const marineLife = data.marine_life.find(item => item.id == id);
+                        if (marineLife) {
+                            openBiologyModal(marineLife);
+                        } else {
+                            alert('找不到该海洋生物信息');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('加载海洋生物数据失败:', error);
+                });
+        }
+        
+        // 删除海洋生物
+        function deleteMarineLife(id) {
+            if (confirm('确定要删除这个海洋生物吗？此操作不可撤销。')) {
+                fetch(`/admin/delete_marine_life/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('海洋生物删除成功');
+                        loadAdminMarineLife();
+                    } else {
+                        alert('删除失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('删除海洋生物失败:', error);
+                    alert('删除失败，请重试');
+                });
+            }
+        }
+        
+        // 添加/编辑模态框
+        function openBiologyModal(data = null) {
+            const modal = document.getElementById('biology-modal');
+            const title = document.getElementById('modal-title');
+            const form = document.getElementById('biology-form');
+            
+            if (data) {
+                // 编辑模式
+                title.textContent = '编辑海洋生物';
+                document.getElementById('biology-id').value = data.id;
+                document.getElementById('biology-name').value = data.name;
+                document.getElementById('biology-scientific').value = data.scientific_name;
+                document.getElementById('biology-description').value = data.description;
+                document.getElementById('biology-habitat').value = data.habitat;
+                document.getElementById('biology-image').value = data.image_url;
+                document.getElementById('biology-category').value = data.category;
+            } else {
+                // 添加模式
+                title.textContent = '添加海洋生物';
+                form.reset();
+                document.getElementById('biology-id').value = '';
+            }
+            
+            modal.style.display = 'block';
+        }
+        
+        // 关闭模态框
+        function closeBiologyModal() {
+            document.getElementById('biology-modal').style.display = 'none';
+        }
+        
+        // 添加新生物按钮事件
+        document.getElementById('add-biology-btn').addEventListener('click', function() {
+            openBiologyModal();
+        });
+        
+        // 关闭模态框按钮事件
+        document.querySelector('.close-modal').addEventListener('click', closeBiologyModal);
+        document.getElementById('cancel-biology').addEventListener('click', closeBiologyModal);
+        
+        // 点击模态框外部关闭
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('biology-modal');
+            if (event.target === modal) {
+                closeBiologyModal();
+            }
+        });
+        
+        // 表单提交事件
+        document.getElementById('biology-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('biology-name').value,
+                scientific_name: document.getElementById('biology-scientific').value,
+                description: document.getElementById('biology-description').value,
+                habitat: document.getElementById('biology-habitat').value,
+                image_url: document.getElementById('biology-image').value,
+                category: document.getElementById('biology-category').value
+            };
+            
+            const id = document.getElementById('biology-id').value;
+            const url = id ? `/admin/update_marine_life/${id}` : '/admin/add_marine_life';
+            const method = id ? 'POST' : 'POST';
+            
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(id ? '海洋生物更新成功' : '海洋生物添加成功');
+                    closeBiologyModal();
+                    
+                    // 刷新数据
+                    if (document.getElementById('admin-biology-content').style.display !== 'none') {
+                        loadAdminMarineLife();
+                    }
+                } else {
+                    alert('操作失败: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('操作失败:', error);
+                alert('操作失败，请重试');
+            });
+        });
+    </script>
+</body>
+</html>

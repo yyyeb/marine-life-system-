@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>海洋生物识别系统 - 登录</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* 登录页面样式 */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; 
+            margin: 0;
+            position: relative; 
+        }
+
+        .login-container {
+            width: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+            padding: 40px;
+            z-index: 10;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .login-container:hover {
+            transform: translateY(-5px);
+        }
+        
+        .role-selector {
+            display: flex;
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .role-option {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .role-option.active {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .role-option:not(.active):hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .role-option.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70%;
+            height: 3px;
+            background: #4cc9f0;
+            border-radius: 3px;
+        }
+        
+        .input-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+        
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 14px 14px 14px 45px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            outline: none;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .input-group input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .options {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .remember {
+            display: flex;
+            align-items: center;
+        }
+        
+        .remember input {
+            margin-right: 8px;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(to right, #4361ee, #3a0ca3);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+        }
+        
+        .login-btn:hover {
+            background: linear-gradient(to right, #3a0ca3, #4361ee);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(67, 97, 238, 0.4);
+        }
+        
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .register-link a {
+            color: #80ffdb;
+            text-decoration: none;
+            font-weight: 500;
+            margin-left: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .register-link a:hover {
+            text-decoration: underline;
+            color: #4cc9f0;
+        }
+        
+        .error-message {
+            color: #ff6b6b;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 500;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            min-height: 20px;
+        }
+        
+        /* 注册模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 400px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .close {
+            color: white;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .close:hover {
+            color: #ff6b6b;
+        }
+        
+        .modal h2 {
+            text-align: center;
+            color: white;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景 -->
+    <div class="ocean-background" id="bubbles-container"></div>
+    
+    <!-- 海洋生物 -->
+    <div class="fish" style="top: 15%; animation-delay: 0s;">
+        <div class="tail"></div>
+    </div>
+    <div class="fish" style="top: 30%; animation-delay: 5s; width: 60px; height: 30px;">
+        <div class="tail"></div>
+    </div>
+    <div class="fish" style="top: 70%; animation-delay: 10s; width: 100px; height: 50px;">
+        <div class="tail"></div>
+    </div>
+    
+    <!-- 波浪效果 -->
+    <div class="wave"></div>
+    <div class="wave"></div>
+    
+    <div class="login-container">
+        <div class="title">
+            <h1>海洋生物识别系统</h1>
+            <p>探索神秘的海底世界</p>
+        </div>
+        
+        <form id="loginForm" method="POST" action="/login">
+            <div class="role-selector">
+                <div class="role-option active" data-role="user">
+                    <i class="fas fa-user"></i> 用户登录
+                </div>
+                <div class="role-option" data-role="admin">
+                    <i class="fas fa-lock"></i> 管理员登录
+                </div>
+                <input type="hidden" id="role" name="role" value="user">
+            </div>
+            
+            <div class="input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" id="username" name="username" placeholder="请输入账号" required>
+            </div>
+            
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="password" name="password" placeholder="请输入密码" required>
+            </div>
+            
+            <div class="options">
+                <div class="remember">
+                    <input type="checkbox" id="remember" name="remember">
+                    <label for="remember">记住密码</label>
+                </div>
+            </div>
+            
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="error-message">
+                        {% for message in messages %}
+                            {{ message }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            <button type="submit" class="login-btn">登录系统</button>
+        </form>
+        
+        <div class="register-link">
+            还没有账号？<a href="#" id="register-link">立即注册</a>
+        </div>
+    </div>
+    
+    <!-- 注册模态框 -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>创建账号</h2>
+            <form id="registerForm" method="POST" action="/register">
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="reg-username" name="username" placeholder="设置账号" required>
+                </div>
+                
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="reg-password" name="password" placeholder="设置密码" required>
+                </div>
+                
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="confirm-password" name="confirm_password" placeholder="确认密码" required>
+                </div>
+                
+                <div id="register-error" class="error-message"></div>
+                
+                <button type="submit" class="login-btn">注册账号</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="marine-life">
+        探索 · 识别 · 保护 · 海洋生物多样性
+    </div>
+    
+    <script>
+        // 海洋气泡效果
+        function createBubbles() {
+            const bubblesContainer = document.getElementById('bubbles-container');
+            const bubbleCount = 20;
+            
+            for (let i = 0; i < bubbleCount; i++) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                
+                // 随机大小
+                const size = Math.random() * 60 + 10;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                
+                // 随机位置
+                bubble.style.left = `${Math.random() * 100}%`;
+                
+                // 随机动画延迟
+                bubble.style.animationDelay = `${Math.random() * 15}s`;
+                
+                bubblesContainer.appendChild(bubble);
+            }
+        }
+        
+        // 用户/管理员切换
+        function setupRoleSelector() {
+            const roleOptions = document.querySelectorAll('.role-option');
+            const roleInput = document.getElementById('role');
+            
+            roleOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    roleOptions.forEach(opt => opt.classList.remove('active'));
+                    option.classList.add('active');
+                    
+                    const role = option.getAttribute('data-role');
+                    roleInput.value = role;
+                });
+            });
+        }
+        
+        // 注册模态框功能
+        function setupRegisterModal() {
+            const modal = document.getElementById('registerModal');
+            const registerLink = document.getElementById('register-link');
+            const closeBtn = document.querySelector('.close');
+            
+            registerLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                modal.style.display = 'block';
+            });
+            
+            closeBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+            
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+        
+        // 注册表单提交
+        function setupRegisterForm() {
+            const registerForm = document.getElementById('registerForm');
+            const errorElement = document.getElementById('register-error');
+            
+            registerForm.addEventListener('submit', (e) => {
+                const password = document.getElementById('reg-password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
+                
+                // 验证输入
+                if (password !== confirmPassword) {
+                    e.preventDefault();
+                    errorElement.textContent = '两次输入的密码不一致！';
+                    return;
+                }
+                
+                if (password.length < 6) {
+                    e.preventDefault();
+                    errorElement.textContent = '密码长度至少为6个字符';
+                }
+            });
+        }
+        
+        // 初始化
+        function initRememberedUser() {
+            const rememberedUser = localStorage.getItem('rememberedUser');
+            if (rememberedUser) {
+                const user = JSON.parse(rememberedUser);
+                document.getElementById('username').value = user.username;
+                document.getElementById('password').value = user.password;
+                document.getElementById('role').value = user.role;
+                
+                // 设置正确的角色选项
+                document.querySelectorAll('.role-option').forEach(option => {
+                    option.classList.remove('active');
+                    if (option.getAttribute('data-role') === user.role) {
+                        option.classList.add('active');
+                    }
+                });
+                
+                document.getElementById('remember').checked = true;
+            }
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            createBubbles();
+            setupRoleSelector();
+            setupRegisterModal();
+            setupRegisterForm();
+            initRememberedUser();
+        });
+    </script>
+</body>
+</html>
